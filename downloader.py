@@ -11,10 +11,14 @@ import re
 import time
 import logging
 import asyncio
+import shutil
 from pathlib import Path
 import yt_dlp
 
 logger = logging.getLogger(__name__)
+
+# FFmpeg path — Render pe /opt/ffmpeg mein install hota hai, warna system PATH
+_FFMPEG_LOCATION = "/opt/ffmpeg" if Path("/opt/ffmpeg/ffmpeg").exists() else None
 
 # ─── Search ───────────────────────────────────────────────────────────────────
 def search_youtube(query: str, max_results: int = 5) -> list[dict]:
@@ -105,6 +109,8 @@ def download_audio(url: str, quality: str, dest: Path) -> str:
             "preferredquality": abr,
         }],
     }
+    if _FFMPEG_LOCATION:
+        ydl_opts["ffmpeg_location"] = _FFMPEG_LOCATION
 
     with yt_dlp.YoutubeDL(ydl_opts) as ydl:
         ydl.download([url])
