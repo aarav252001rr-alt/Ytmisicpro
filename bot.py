@@ -325,7 +325,9 @@ def seconds_to_min(sec):
 
 
 # ─── Main ─────────────────────────────────────────────────────────────────────
-def main():
+import asyncio as _asyncio
+
+async def _run():
     if not BOT_TOKEN:
         raise ValueError("❌ BOT_TOKEN env variable set nahi hai!")
 
@@ -337,19 +339,28 @@ def main():
     app.add_handler(CallbackQueryHandler(callback_handler))
 
     if RENDER_URL:
-        # Webhook mode — Render pe deploy karne ke liye
         webhook_url = f"{RENDER_URL.rstrip('/')}{WEBHOOK_PATH}"
         logger.info(f"🚀 Webhook mode | {webhook_url} | port={PORT}")
-        app.run_webhook(
-            listen="0.0.0.0",
-            port=PORT,
-            url_path=WEBHOOK_PATH,
-            webhook_url=webhook_url,
-        )
+        async with app:
+            await app.bot.set_webhook(webhook_url)
+            await app.updater.start_webhook(
+                listen="0.0.0.0",
+                port=PORT,
+                url_path=WEBHOOK_PATH,
+            )
+            await app.start()
+            logger.info("Bot running... Press Ctrl+C to stop")
+            await _asyncio.Event().wait()   # forever
     else:
-        # Polling mode — local testing ke liye
         logger.info("🔄 Polling mode (local)")
-        app.run_polling(drop_pending_updates=True)
+        async with app:
+            await app.updater.start_polling(drop_pending_updates=True)
+            await app.start()
+            await _asyncio.Event().wait()
+
+
+def main():
+    _asyncio.run(_run())
 
 
 if __name__ == "__main__":
