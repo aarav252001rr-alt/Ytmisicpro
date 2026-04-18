@@ -18,7 +18,9 @@ import yt_dlp
 logger = logging.getLogger(__name__)
 
 # FFmpeg path — Render pe /opt/ffmpeg mein install hota hai, warna system PATH
-_FFMPEG_LOCATION = "/opt/ffmpeg" if Path("/opt/ffmpeg/ffmpeg").exists() else None
+import os as _os
+_HOME_FFMPEG = Path(_os.environ.get("HOME", "/root")) / "ffmpeg"
+_FFMPEG_LOCATION = str(_HOME_FFMPEG) if (_HOME_FFMPEG / "ffmpeg").exists() else None
 
 # ─── Search ───────────────────────────────────────────────────────────────────
 def search_youtube(query: str, max_results: int = 5) -> list[dict]:
