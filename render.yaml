@@ -1,0 +1,14 @@
+services:
+  - type: web
+    name: yt-music-bot
+    env: python
+    plan: free
+    buildCommand: pip install -r requirements.txt && apt-get install -y ffmpeg || true
+    startCommand: python bot.py
+    envVars:
+      - key: BOT_TOKEN
+        sync: false          # Render dashboard mein manually daalna hai
+      - key: RENDER_URL
+        sync: false          # Apna Render URL daalna hai, e.g. https://yt-music-bot.onrender.com
+      - key: PORT
+        value: "8080"
